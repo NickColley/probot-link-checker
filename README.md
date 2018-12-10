@@ -18,4 +18,5 @@ Thanks to:
 - Test for hidden dot .files
 - Test for relative paths without a dot infront
 - Test anchors relative in other files
+- Test relative links that target readme.md e.g. src/vendor/polyfill
 - Probot stuff
