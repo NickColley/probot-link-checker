@@ -55,8 +55,12 @@ function checkRelativeLinks (files) {
                     Object.keys(relativeLinks).forEach(link => {
                         const relativeLinkMatches = (
                             files.some(originalFile => {
+                                let originalPath = url.resolve('.', originalFile.path)
+                                if (link.startsWith('/')) {
+                                    originalPath = '/' + originalPath
+                                }
                                 return (
-                                    url.resolve('.', originalFile.path) === url.resolve(file.path, link)
+                                    originalPath === url.resolve(file.path, link)
                                 )
                             })
                         )
