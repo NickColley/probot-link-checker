@@ -9,21 +9,44 @@ const visit = require('unist-util-visit')
 function getRelativeLinks (options) {
     return function (tree, file) {
         var relativeLinksMap = {}
+        var headingsMap = {}
 
         visit(tree, ['link'], find)
-        
-        function find(node) {
-            const { url } = node
-            const isRelativeLink = (
-                url.startsWith('./') ||
-                url.startsWith('../') ||
-                url.startsWith('/')
-            )
-            const isLinkToMarkdownFile = url.endsWith('.md')
-            if (isRelativeLink && isLinkToMarkdownFile) {
-                relativeLinksMap[url] = node
+        visit(tree, ['heading'], getAnchors)
+
+        function getAnchors (node) {
+            // TODO use proper github algortithm for slugs?
+            if (!node || !node.children || !node.children[0] || !node.children[0].value) {
+                return
+            }
+            const anchor = '#' + node.children[0].value.toLowerCase().replace(/ /g, '-')
+            if (headingsMap[file.path]) {
+                headingsMap[file.path].push(anchor)
+            } else {
+                headingsMap[file.path] = [anchor]
             }
         }
+        
+        function find(node) {
+            const { url: nodeUrl } = node
+            const { path, hash } = url.parse(nodeUrl)
+            if (!path) {
+                return
+            }
+            const isRelativeLink = (
+                path.startsWith('./') ||
+                path.startsWith('../') ||
+                path.startsWith('/')
+            )
+            const isLinkToMarkdownFile = path.endsWith('.md')
+            if (isRelativeLink && isLinkToMarkdownFile) {
+                relativeLinksMap[path] = {
+                    node,
+                    hash
+                }
+            }
+        }
+        file.data.headings = headingsMap
         file.data.relativeLinks = relativeLinksMap
     }
 }
@@ -53,6 +76,7 @@ function checkRelativeLinks (files) {
                 files.forEach(file => {
                     const { relativeLinks } = file.data
                     Object.keys(relativeLinks).forEach(link => {
+                        const { node, hash } = relativeLinks[link]
                         const relativeLinkMatches = (
                             files.some(originalFile => {
                                 let originalPath = url.resolve('.', originalFile.path)
@@ -64,11 +88,32 @@ function checkRelativeLinks (files) {
                                 )
                             })
                         )
+                        if (relativeLinkMatches && hash) {
+                            files.forEach(originalFile => {
+                                const { headings: originalHeadings } = originalFile.data
+                                let originalPath = url.resolve('.', originalFile.path)
+                                if (link.startsWith('/')) {
+                                    originalPath = '/' + originalPath
+                                }
+                                if (originalPath === url.resolve(file.path, link)) {
+                                    if (!originalHeadings[originalPath].includes(hash)) {
+                                        messages.push({
+                                            message: 'Relative anchor link not found',
+                                            hash,
+                                            path: file.path,
+                                            link: node.url,
+                                            position: node.position
+                                        })
+                                    }
+                                }
+                            })
+                        }
                         if (!relativeLinkMatches) {
                             messages.push({
+                                message: 'Relative link not found',
                                 path: file.path,
-                                link: relativeLinks[link].url,
-                                position: relativeLinks[link].position
+                                link: node.url,
+                                position: node.position
                             })
                         }
                     })

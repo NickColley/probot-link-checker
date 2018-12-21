@@ -12,8 +12,9 @@ Thanks to:
 
 ## TODO
 
+- Add proper test suite
 - Cover more cases found in other scripts
-- Figure out a way to make this a remark plugin
+- Figure out a way to make this a remark plugin?
 - Relative links to Github UI stuff, like issues/new
 - Test for hidden dot .files
 - Test for relative paths without a dot infront

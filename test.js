@@ -28,7 +28,13 @@ glob("fixtures/**/*.md", (error, filePaths) => {
         .all(filesWithContentsPromises)
         .then(checkRelativeLinks)
         .then(results => {
-            if (results.length !== 7) {
+            if(!results.every(result => result.link)) {
+                throw new Error('Link not truthy on result')
+            }
+            if(!results.every(result => result.position)) {
+                throw new Error('Position not truthy on result')
+            }
+            if (results.length !== 8) {
                 throw new Error('Unexpected amount of errors')
             }
             console.timeEnd('nested')
