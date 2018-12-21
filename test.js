@@ -28,7 +28,6 @@ glob("fixtures/**/*.md", (error, filePaths) => {
         .all(filesWithContentsPromises)
         .then(checkRelativeLinks)
         .then(results => {
-            console.log(results, results.length)
             if (results.length !== 7) {
                 throw new Error('Unexpected amount of errors')
             }

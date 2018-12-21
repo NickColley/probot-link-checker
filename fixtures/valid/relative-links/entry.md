@@ -7,3 +7,4 @@ Often you move files around and accidentally forget to rename the relative paths
 - [Nested One Deep](./nested/one-deep.md)
 - [Nested Two Deep](./nested/nested/two-deep.md)
 - [Nested One Deep No Dot](/fixtures/valid/relative-links/nested/one-deep.md)
+- [Nested One Deep Anchor](./nested/one-deep.md#heading)
