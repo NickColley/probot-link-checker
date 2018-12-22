@@ -6,6 +6,9 @@ const remark = require('remark')
 
 const visit = require('unist-util-visit')
 
+const GithubSlugger = require('github-slugger')
+const slugger = new GithubSlugger()
+
 function getRelativeLinks (options) {
     return function (tree, file) {
         var relativeLinksMap = {}
@@ -15,11 +18,10 @@ function getRelativeLinks (options) {
         visit(tree, ['heading'], getAnchors)
 
         function getAnchors (node) {
-            // TODO use proper github algortithm for slugs?
             if (!node || !node.children || !node.children[0] || !node.children[0].value) {
                 return
             }
-            const anchor = '#' + node.children[0].value.toLowerCase().replace(/ /g, '-')
+            const anchor = '#' + slugger.slug(node.children[0].value)
             if (headingsMap[file.path]) {
                 headingsMap[file.path].push(anchor)
             } else {
@@ -48,6 +50,7 @@ function getRelativeLinks (options) {
         }
         file.data.headings = headingsMap
         file.data.relativeLinks = relativeLinksMap
+        slugger.reset()
     }
 }
 
