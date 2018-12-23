@@ -10,6 +10,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@octokit/rest": "^16.3.0",
     "globby": "^8.0.1",
     "jest": "^23.6.0",
     "outdent": "^0.7.0"
