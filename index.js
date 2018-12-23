@@ -32,17 +32,22 @@ function getRelativeLinks (options) {
         function find(node) {
             const { url: nodeUrl } = node
             const { path, hash } = url.parse(nodeUrl)
-            if (!path) {
-                return
-            }
-            const isRelativeLink = (
-                path.startsWith('./') ||
-                path.startsWith('../') ||
-                path.startsWith('/')
-            )
-            const isLinkToMarkdownFile = path.endsWith('.md')
-            if (isRelativeLink && isLinkToMarkdownFile) {
-                relativeLinksMap[path] = {
+
+            if (path) {
+                const isRelativeLink = (
+                    path.startsWith('./') ||
+                    path.startsWith('../') ||
+                    path.startsWith('/')
+                )
+                const isLinkToMarkdownFile = path.endsWith('.md')
+                if (isRelativeLink && isLinkToMarkdownFile) {
+                    relativeLinksMap[path] = {
+                        node,
+                        hash
+                    }
+                }
+            } else if (hash) {
+                relativeLinksMap[hash] = {
                     node,
                     hash
                 }
@@ -83,6 +88,9 @@ function checkRelativeLinks (files) {
                         const relativeLinkMatches = (
                             files.some(originalFile => {
                                 let originalPath = url.resolve('.', originalFile.path)
+                                if (link.startsWith('#')) {
+                                    return true
+                                }
                                 if (link.startsWith('/')) {
                                     originalPath = '/' + originalPath
                                 }
@@ -94,11 +102,17 @@ function checkRelativeLinks (files) {
                         if (relativeLinkMatches && hash) {
                             files.forEach(originalFile => {
                                 const { headings: originalHeadings } = originalFile.data
+                                if (!originalHeadings) {
+                                    return
+                                }
                                 let originalPath = url.resolve('.', originalFile.path)
                                 if (link.startsWith('/')) {
                                     originalPath = '/' + originalPath
                                 }
-                                if (originalPath === url.resolve(file.path, link)) {
+                                if (
+                                    link.startsWith('#') ||
+                                    (originalPath === url.resolve(file.path, link))
+                                ) {
                                     if (!originalHeadings[originalPath].includes(hash)) {
                                         messages.push({
                                             message: 'Relative anchor link not found',
