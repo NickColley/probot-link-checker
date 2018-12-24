@@ -1,5 +1,6 @@
 dependencies:
   github-slugger: 1.2.0
+  minimatch: 3.0.4
   probot: 7.4.0
   probot-config: 1.0.0
   remark: 10.0.1
@@ -4860,6 +4861,7 @@ specifiers:
   github-slugger: ^1.2.0
   globby: ^8.0.1
   jest: ^23.6.0
+  minimatch: ^3.0.4
   outdent: ^0.7.0
   probot: ^7.4.0
   probot-config: ^1.0.0

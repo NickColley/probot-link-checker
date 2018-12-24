@@ -1,0 +1,6 @@
+# Configuration for Probot link checker
+
+# Ignore files based on minimatch...
+# https://github.com/isaacs/minimatch#usage
+ignoredFiles:
+  - fixtures/invalid/**/*.md
