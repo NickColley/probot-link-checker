@@ -10,7 +10,7 @@ Thanks to:
 - https://github.com/davidtheclark/remark-lint-no-dead-urls
 - https://github.com/wemake-services/remark-lint-are-links-valid
 
-Lorem
+Lorem ipsum
 
 ## TODO
 
