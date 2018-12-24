@@ -8,7 +8,7 @@ describe('fixtures', () => {
     beforeAll(async () => {
         const filePaths = await globby("fixtures/**/*.md")
         
-        const filesWithContents = await Promise.all(filePaths.map(path => {
+        const filesWithContentsPromises = filePaths.map(path => {        
             return new Promise((resolve, reject) => {
                 fs.readFile(path, (error, contents) => {
                     if (error) {
@@ -21,8 +21,9 @@ describe('fixtures', () => {
                     })
                 })
             })
-        }))
+        })
     
+        const filesWithContents = await Promise.all(filesWithContentsPromises)
         results = await checkRelativeLinks(filesWithContents)
     })
     it('should have a link property on the results', async () => {
