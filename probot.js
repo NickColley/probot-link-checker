@@ -29,7 +29,7 @@ async function analyzeTree(context, owner, repo, tree_sha, ignoredFiles) {
     const { path: filename, type } = path
     if (ignoredFiles) {
       return ignoredFiles.some(file => {
-        return minimatch(file, filename)
+        return !minimatch(filename, file)
       })
     }
     return true
@@ -133,7 +133,7 @@ module.exports = (app) => {
       app.log('End check (failure)')
     } else {
       await context.github.checks.create(context.repo({
-        name: 'My app!',
+        name: 'Probot Link Checker',
         head_branch,
         head_sha,
         status: 'completed',
