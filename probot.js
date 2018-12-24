@@ -1,4 +1,5 @@
 const getConfig = require('probot-config');
+const minimatch = require("minimatch")
 const checkRelativeLinks = require('./index.js')
 
 // Modified from  https://github.com/urcomputeringpal/yamburger/blob/master/lib/yamburger.js
@@ -13,15 +14,26 @@ async function processBlob(context, owner, repo, tree_sha, filename, file_sha) {
   }
 }
 
-async function analyzeTree(context, owner, repo, tree_sha) {
+async function analyzeTree(context, owner, repo, tree_sha, ignoredFiles) {
   // Get tree, recursively
   const { data: { tree } } = await context.github.gitdata.getTree({owner, repo, tree_sha, recursive: 1})
 
-  // Filter tree, only blobs ending in '.md'
-  const blobs = tree.filter(path => {
+  const blobs = tree
+   // Filter tree, only blobs ending in '.md'
+  .filter(path => {
     const { path: filename, type } = path
     return type === 'blob'  && filename.endsWith('.md')
-  });
+  })
+  // Filter out any ignored files
+  .filter(path => {
+    const { path: filename, type } = path
+    if (ignoredFiles) {
+      return ignoredFiles.some(file => {
+        return minimatch(file, filename)
+      })
+    }
+    return true
+  })
 
   // Process each blob
   return Promise.all(blobs.map(blob => {
@@ -37,8 +49,7 @@ module.exports = (app) => {
   app.on(['check_suite.requested', 'check_suite.rerequested', 'check_run.rerequested'], check)
 
   async function check (context) {
-    const config = await getConfig(context, 'link-checker.yml');
-    // TODO: Allow ignoring of files based on a glob
+    const { ignoredFiles } = await getConfig(context, 'link-checker.yml');
 
     const { owner, repo } = context.repo()
     
@@ -63,7 +74,7 @@ module.exports = (app) => {
     
     
     const { data: { sha: tree_sha } } = await context.github.repos.getCommit({ owner, repo, sha: head_sha })
-    const filesWithContents = await analyzeTree(context, owner, repo, tree_sha)
+    const filesWithContents = await analyzeTree(context, owner, repo, tree_sha, ignoredFiles)
     const results = await checkRelativeLinks(filesWithContents)
     
     if (results.length > 0) {
