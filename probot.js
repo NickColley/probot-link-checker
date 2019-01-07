@@ -49,6 +49,7 @@ module.exports = (app) => {
   app.on(['check_suite.requested', 'check_suite.rerequested', 'check_run.rerequested'], check)
 
   async function check (context) {
+    const started_at = new Date()
     const { ignoredFiles } = await getConfig(context, 'link-checker.yml');
 
     const { owner, repo } = context.repo()
@@ -107,6 +108,7 @@ module.exports = (app) => {
           head_branch,
           head_sha,
           status: 'completed',
+          started_at: started_at,
           conclusion: 'failure',
           completed_at: new Date(),
           output: {
@@ -122,6 +124,7 @@ module.exports = (app) => {
           head_branch,
           head_sha,
           status: 'completed',
+          started_at: started_at,
           conclusion: 'failure',
           completed_at: new Date(),
           output: {
@@ -137,6 +140,7 @@ module.exports = (app) => {
         head_branch,
         head_sha,
         status: 'completed',
+        started_at: started_at,
         conclusion: 'success',
         completed_at: new Date(),
         output: {
